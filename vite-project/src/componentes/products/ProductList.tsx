@@ -1,7 +1,9 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
-import "./ProductList.css"; // Import the CSS file
+import "./ProductList.css";
+import App from "../../App";
+
 
 type CartItem = {
   id: string;
@@ -9,16 +11,6 @@ type CartItem = {
   price: string;
   quantity: number;
   img: string;
-};
-
-type CartContextType = {
-  cartItems: CartItem[];
-  addToCart: (product: any) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  isCartOpen: boolean;
-  setIsCartOpen: (isOpen: boolean) => void;
 };
 
 const products = [
@@ -127,27 +119,26 @@ export default function ProductList() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [sortOption, setSortOption] = useState("default");
   const [filteredProducts, setFilteredProducts] = useState(products);
-
-  // Shopping cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartAnimation, setCartAnimation] = useState("");
 
-  // Add to cart function
+  //Go to CheckoutStepper
+  const goToCheckout = () => {
+ 
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const addToCart = (product: any) => {
     setCartItems((prevItems) => {
-      // Check if item already exists in cart
       const existingItem = prevItems.find((item) => item.id === product.id);
-
       if (existingItem) {
-        // Increase quantity if item exists
         return prevItems.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        // Add new item with quantity 1
         return [
           ...prevItems,
           {
@@ -160,51 +151,40 @@ export default function ProductList() {
         ];
       }
     });
-
-    // Show cart after adding item
     setIsCartOpen(true);
-
-    // Animate cart icon
     setCartAnimation("pulse");
     setTimeout(() => setCartAnimation(""), 500);
   };
 
-  // Remove from cart function
   const removeFromCart = (id: string) => {
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
-  // Update quantity function
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id);
-      return;
+    } else {
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === id ? { ...item, quantity } : item
+        )
+      );
     }
-
-    setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
   };
 
-  // Clear cart function
   const clearCart = () => {
     setCartItems([]);
   };
 
-  // Calculate total items in cart
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Calculate total price
   const totalPrice = cartItems.reduce((sum, item) => {
     const itemPrice = parseFloat(item.price.replace(/[^0-9.]/g, ""));
     return sum + itemPrice * item.quantity;
   }, 0);
 
-  // Filter and sort products when query, filter or sort option changes
   useEffect(() => {
     let result = [...products];
 
-    // Apply search filter
     if (query) {
       result = result.filter(
         (product) =>
@@ -214,7 +194,6 @@ export default function ProductList() {
       );
     }
 
-    // Apply category filter
     if (selectedFilter !== "all") {
       if (selectedFilter === "discount") {
         result = result.filter((product) => product.discount);
@@ -230,19 +209,18 @@ export default function ProductList() {
       }
     }
 
-    // Apply sorting
     if (sortOption === "price-low") {
-      result.sort((a, b) => {
-        const priceA = parseFloat(a.price.replace(/[^0-9.]/g, ""));
-        const priceB = parseFloat(b.price.replace(/[^0-9.]/g, ""));
-        return priceA - priceB;
-      });
+      result.sort(
+        (a, b) =>
+          parseFloat(a.price.replace(/[^0-9.]/g, "")) -
+          parseFloat(b.price.replace(/[^0-9.]/g, ""))
+      );
     } else if (sortOption === "price-high") {
-      result.sort((a, b) => {
-        const priceA = parseFloat(a.price.replace(/[^0-9.]/g, ""));
-        const priceB = parseFloat(b.price.replace(/[^0-9.]/g, ""));
-        return priceB - priceA;
-      });
+      result.sort(
+        (a, b) =>
+          parseFloat(b.price.replace(/[^0-9.]/g, "")) -
+          parseFloat(a.price.replace(/[^0-9.]/g, ""))
+      );
     } else if (sortOption === "rating") {
       result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
@@ -256,7 +234,7 @@ export default function ProductList() {
       <div className="cart-header">
         <button
           onClick={() => setIsCartOpen(!isCartOpen)}
-          className={`cart-button ${cartAnimation ? cartAnimation : "normal"}`}
+          className={`cart-button ${cartAnimation || "normal"}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -269,115 +247,83 @@ export default function ProductList() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <circle cx="9" cy="21" r="1"></circle>
-            <circle cx="20" cy="21" r="1"></circle>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
           {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
         </button>
       </div>
 
-      {/* Shopping Cart Drawer */}
+      {/* Cart Drawer */}
       {isCartOpen && (
-        <div className="cart-drawer">
-          <div className="cart-header-section">
-            <h2 className="cart-title">Shporta ({totalItems})</h2>
-            <button
-              onClick={() => setIsCartOpen(false)}
-              className="close-cart-button"
-            >
-              ×
-            </button>
-          </div>
+        <>
+          <div className="cart-drawer">
+            <div className="cart-header-section">
+              <h2 className="cart-title">Shporta ({totalItems})</h2>
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="close-cart-button"
+              >
+                ×
+              </button>
+            </div>
 
-          <div className="cart-items-container">
-            {cartItems.length === 0 ? (
-              <div className="empty-cart">
-                <div className="empty-cart-icon">🛒</div>
-                <p>Shporta juaj është bosh</p>
-              </div>
-            ) : (
-              <div>
-                {cartItems.map((item) => (
+            <div className="cart-items-container">
+              {cartItems.length === 0 ? (
+                <div className="empty-cart">
+                  <div className="empty-cart-icon">🛒</div>
+                  <p>Shporta juaj është bosh</p>
+                </div>
+              ) : (
+                cartItems.map((item) => (
                   <div key={item.id} className="cart-item">
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      className="cart-item-image"
-                    />
+                    <img src={item.img} alt={item.title} className="cart-item-image" />
                     <div className="cart-item-details">
-                      <h4 className="cart-item-title">{item.title}</h4>
-                      <div className="cart-item-price">{item.price}</div>
+                      <h4>{item.title}</h4>
+                      <div>{item.price}</div>
                     </div>
                     <div className="cart-item-actions">
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                        className="quantity-button"
-                      >
-                        -
-                      </button>
-                      <span className="quantity-text">{item.quantity}</span>
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        className="quantity-button"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="remove-item-button"
-                      >
-                        ×
-                      </button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                      <span>{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                      <button onClick={() => removeFromCart(item.id)}>×</button>
                     </div>
                   </div>
-                ))}
+                ))
+              )}
+            </div>
+
+            {cartItems.length > 0 && (
+              <div className="cart-footer">
+                <div className="cart-total">
+                  <span>Totali:</span>
+                  <strong>€{totalPrice.toFixed(2)}</strong>
+                </div>
+                <div className="cart-actions">
+                  <button onClick={clearCart} className="clear-cart-button">
+                    Pastro
+                  </button>
+                  <a href="/checkout" className="checkout-button">Vazhdo në Arkë</a>
+                </div>
               </div>
             )}
           </div>
-
-          {cartItems.length > 0 && (
-            <div className="cart-footer">
-              <div className="cart-total">
-                <span>Totali:</span>
-                <span style={{ fontWeight: "bold" }}>
-                  €{totalPrice.toFixed(2)}
-                </span>
-              </div>
-
-              <div className="cart-actions">
-                <button onClick={clearCart} className="clear-cart-button">
-                  Pastro
-                </button>
-                <button className="checkout-button">Vazhdo në Arkë</button>
-              </div>
-            </div>
-          )}
-        </div>
+          <div className="cart-overlay" onClick={() => setIsCartOpen(false)} />
+        </>
       )}
 
-      {/* Overlay when cart is open */}
-      {isCartOpen && (
-        <div className="cart-overlay" onClick={() => setIsCartOpen(false)} />
-      )}
-
-      {/* Search results heading */}
+      {/* Search Results */}
       {query && (
         <div className="search-results-heading">
-          <h2 className="search-results-title">
-            Rezultatet e kërkimit për:{" "}
-            <span className="search-query">{query}</span>
+          <h2>
+            Rezultatet e kërkimit për: <span>{query}</span>
           </h2>
         </div>
       )}
 
-      {/* Filter and Sort Controls */}
+      {/* Filters & Sort */}
       <div className="filter-sort-container">
-        {/* Category filters */}
         <div className="filter-buttons">
           {filters.map((filter) => (
             <button
@@ -391,14 +337,11 @@ export default function ProductList() {
             </button>
           ))}
         </div>
-
-        {/* Sort options */}
         <div className="sort-container">
-          <label className="sort-label">Rendit sipas:</label>
+          <label>Rendit sipas:</label>
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="sort-select"
           >
             <option value="default">Parazgjedhur</option>
             <option value="price-low">Çmimi: I ulët - I lartë</option>
@@ -412,41 +355,19 @@ export default function ProductList() {
       <div className="product-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
-            <div key={product.id} className="product-card-container">
-              <ProductCard
-                id={product.id}
-                img={product.img}
-                title={product.title}
-                description={product.description}
-                price={product.price}
-                tags={product.tags}
-                rating={product.rating}
-                discount={product.discount}
-                isNew={product.isNew} // Make sure to pass isNew property here!
-                onAddToCart={() => addToCart(product)}
-              />
-            </div>
+            <ProductCard
+              key={product.id}
+              {...product}
+              onAddToCart={() => addToCart(product)}
+            />
           ))
         ) : (
           <div className="no-products-found">
-            <div className="no-products-emoji">😕</div>
-            <h3 className="no-products-title">Nuk u gjet asnjë produkt</h3>
-            <p className="no-products-message">
-              Nuk u gjet asnjë produkt për: <strong>{query}</strong>
-              {selectedFilter !== "all" && (
-                <>
-                  {" "}
-                  me filtrin: <strong>{selectedFilter}</strong>
-                </>
-              )}
-            </p>
-            <button
-              onClick={() => {
-                setSelectedFilter("all");
-                setSortOption("default");
-              }}
-              className="reset-filters-button"
-            >
+            <p>Nuk u gjet asnjë produkt për: <strong>{query}</strong></p>
+            <button onClick={() => {
+              setSelectedFilter("all");
+              setSortOption("default");
+            }}>
               Reset Filtrave
             </button>
           </div>
@@ -454,11 +375,9 @@ export default function ProductList() {
       </div>
 
       {/* Product count */}
-      {filteredProducts.length > 0 && (
-        <div className="product-count">
-          Duke shfaqur {filteredProducts.length} produkte nga {products.length}
-        </div>
-      )}
+      <div className="product-count">
+        Duke shfaqur {filteredProducts.length} produkte nga {products.length}
+      </div>
     </div>
   );
 }

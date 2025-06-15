@@ -8,6 +8,7 @@ import ProductPage from "./Pages/ProductPage";
 import ProductList from "./componentes/products/ProductList";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import CheckoutStepper from "./componentes/products/CheckoutStepper";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/product" element={<ProductPage />} />
               <Route path="/products" element={<ProductList />} />
+              <Route path="/checkout" element={<CheckoutStepper />} />
             </Route>
           </Routes>
         </div>
