@@ -1,26 +1,40 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
-interface Product {
+type Product = {
   product: string;
   type: string;
   price: number;
-}
+};
 
-interface Contact {
+type Contact = {
   id: number;
   name: string;
   email: string;
   message: string;
   date: string;
-}
+};
 
-interface AppContextType {
+type ProductData = {
+  id: number;
+  img: string;
+  title: string;
+  description: string;
+  price: string;
+  tags: string[];
+  rating: number;
+  discount: string;
+  isNew: boolean;
+};
+
+type AppContextType = {
   product: Product[];
   contacts: Contact[];
-  gettingData: () => Promise<void>;
+  productdata: ProductData[];
+  fetchProducts: () => Promise<void>;
   fetchContacts: () => Promise<void>;
-}
+  fetchProductData: () => Promise<void>;
+};
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -29,10 +43,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [product, setProduct] = useState<Product[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [productdata, setProductdata] = useState<ProductData[]>([]);
 
-  const gettingData = async () => {
+  const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/data");
+      const response = await axios.get("http://localhost:3000/productdata");
       console.log("Produktet:", response.data);
       setProduct(response.data);
     } catch (error) {
@@ -50,14 +65,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const fetchProductData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/productdata");
+      setProductdata(response.data);
+    } catch (err) {
+      console.error("Datat e produkteve nuk u kthyen:", err);
+    }
+  };
+
   useEffect(() => {
-    gettingData();
+    fetchProducts();
     fetchContacts();
+    fetchProductData();
   }, []);
 
   return (
     <AppContext.Provider
-      value={{ product, contacts, gettingData, fetchContacts }}
+      value={{
+        product,
+        contacts,
+        productdata,
+        fetchProducts,
+        fetchContacts,
+        fetchProductData,
+      }}
     >
       {children}
     </AppContext.Provider>
@@ -65,7 +97,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 export const useAppContext = () => {
+  console.log(AppContext);
   const context = useContext(AppContext);
+
   if (!context) {
     throw new Error("useAppContext must be used within an AppProvider");
   }

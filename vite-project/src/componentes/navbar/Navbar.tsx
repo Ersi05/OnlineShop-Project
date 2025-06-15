@@ -147,6 +147,23 @@ const Navbar = () => {
             >
               Product
             </a>
+            <a
+              className="nav-link text-white"
+              href="/admindashboard"
+              onClick={() => setIsNavOpen(false)}
+              style={navLinkStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 255, 255, 0.1)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              Log In
+            </a>
           </div>
         </div>
       </div>

@@ -2,6 +2,9 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import "./ProductList.css";
+import axios from "axios";
+import { useAppContext } from "../../context/AppContext";
+import "./ProductList.css";
 import App from "../../App";
 
 
@@ -11,6 +14,16 @@ type CartItem = {
   price: string;
   quantity: number;
   img: string;
+};
+
+type CartContextType = {
+  cartItems: CartItem[];
+  addToCart: (product: any) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
 };
 
 const products = [
@@ -112,12 +125,16 @@ const filters = [
 ];
 
 export default function ProductList() {
+  const { productdata } = useAppContext();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const query = searchParams.get("q")?.toLowerCase() || "";
 
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [sortOption, setSortOption] = useState("default");
+  const [filteredProducts, setFilteredProducts] = useState(productdata);
+
+  // Shopping cart state
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -183,28 +200,49 @@ export default function ProductList() {
   }, 0);
 
   useEffect(() => {
-    let result = [...products];
+    let result = [...productdata];
 
     if (query) {
       result = result.filter(
-        (product) =>
-          product.title.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query) ||
-          product.tags.some((tag) => tag.toLowerCase().includes(query))
+        (productdata) =>
+          productdata.title.toLowerCase().includes(query) ||
+          productdata.description.toLowerCase().includes(query) ||
+          productdata.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
     if (selectedFilter !== "all") {
       if (selectedFilter === "discount") {
-        result = result.filter((product) => product.discount);
-      } else {
+        result = result.filter((productdata) => productdata.discount);
+      } else if (selectedFilter === "parfum") {
         result = result.filter(
-          (product) =>
-            product.tags.some((tag) =>
-              tag.toLowerCase().includes(selectedFilter)
-            ) ||
-            product.title.toLowerCase().includes(selectedFilter) ||
-            product.description.toLowerCase().includes(selectedFilter)
+          (productdata) =>
+            Array.isArray(productdata.tags) &&
+            productdata.tags.some((tag) => tag.includes("parfum"))
+        );
+      } else if (selectedFilter === "hidratim") {
+        result = result.filter(
+          (productdata) =>
+            Array.isArray(productdata.tags) &&
+            productdata.tags.some((tag) =>
+              tag.toLowerCase().includes("hidratim")
+            )
+        );
+      } else if (selectedFilter === "natyral") {
+        result = result.filter(
+          (productdata) =>
+            Array.isArray(productdata.tags) &&
+            productdata.tags.some((tag) =>
+              tag.toLowerCase().includes("natyral")
+            )
+        );
+      } else if (selectedFilter === "pastrim") {
+        result = result.filter(
+          (productdata) =>
+            Array.isArray(productdata.tags) &&
+            productdata.tags.some((tag) =>
+              tag.toLowerCase().includes("pastrim")
+            )
         );
       }
     }
@@ -375,6 +413,12 @@ export default function ProductList() {
       </div>
 
       {/* Product count */}
+      {filteredProducts.length > 0 && (
+        <div className="product-count">
+          Duke shfaqur {filteredProducts.length} produkte nga{" "}
+          {productdata.length}
+        </div>
+      )}
       <div className="product-count">
         Duke shfaqur {filteredProducts.length} produkte nga {products.length}
       </div>

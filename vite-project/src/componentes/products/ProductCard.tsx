@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./ProductCard.css";
 
 type ProductCardProps = {
-  id: string;
+  id: number;
   img: string;
   title: string;
   description: string;
