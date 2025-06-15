@@ -23,24 +23,12 @@ export default function App() {
               <Route path="/product" element={<ProductPage />} />
               <Route path="/products" element={<ProductList />} />
               <Route path="/checkout" element={<CheckoutStepper />} />
+              
+            <Route path="admindashboard" element={<AdminDashboard />} />
             </Route>
           </Routes>
         </div>
       </BrowserRouter>
     </>
-    <BrowserRouter>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<DefaultPage />}>
-            <Route path="home" element={<HomePage />} />
-            <Route path="about" element={<AboutPage />} />
-            <Route path="contact" element={<ContactPage />} />
-            <Route path="product" element={<ProductPage />} />
-            <Route path="products" element={<ProductList />} />
-            <Route path="admindashboard" element={<AdminDashboard />} />
-          </Route>
-        </Routes>
-      </div>
-    </BrowserRouter>
   );
 }

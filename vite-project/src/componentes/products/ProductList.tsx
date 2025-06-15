@@ -1,11 +1,11 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import "./ProductList.css";
-import axios from "axios";
+
 import { useAppContext } from "../../context/AppContext";
 import "./ProductList.css";
-import App from "../../App";
+
 
 
 type CartItem = {
@@ -16,15 +16,6 @@ type CartItem = {
   img: string;
 };
 
-type CartContextType = {
-  cartItems: CartItem[];
-  addToCart: (product: any) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  isCartOpen: boolean;
-  setIsCartOpen: (isOpen: boolean) => void;
-};
 
 const products = [
   {
@@ -135,16 +126,13 @@ export default function ProductList() {
   const [filteredProducts, setFilteredProducts] = useState(productdata);
 
   // Shopping cart state
-  const [filteredProducts, setFilteredProducts] = useState(products);
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartAnimation, setCartAnimation] = useState("");
 
   //Go to CheckoutStepper
-  const goToCheckout = () => {
- 
-  }
-
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const addToCart = (product: any) => {
     setCartItems((prevItems) => {
